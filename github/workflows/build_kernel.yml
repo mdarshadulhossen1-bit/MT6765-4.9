@@ -14,7 +14,7 @@ jobs:
 
     - name: Install Build Dependencies
       run: |
-        sudo apt-get update && sudo apt-get install -y bc build-essential bison flex libssl-dev git wget libelf-dev gcc-aarch64-linux-gnu
+        sudo apt-get update && sudo apt-get install -y bc build-essential bison flex libssl-dev git wget libelf-dev gcc-aarch64-linux-gnu make
 
     - name: Set up MemKernel driver
       run: |
@@ -23,7 +23,9 @@ jobs:
     - name: Build Kernel and Loadable Module
       run: |
         export ARCH=arm64
+        export SUBARCH=arm64
         export CROSS_COMPILE=aarch64-linux-gnu-
+        export PATH="/usr/bin:$PATH"
         
         make 2e_defconfig
         make -j$(nproc) modules
