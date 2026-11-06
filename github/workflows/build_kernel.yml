@@ -16,11 +16,15 @@ jobs:
       run: |
         sudo apt-get update && sudo apt-get install -y bc build-essential bison flex libssl-dev git wget libelf-dev gcc-aarch64-linux-gnu make
 
-    - name: Set up MemKernel driver
+    - name: Setup MemKernel Driver Source (Video Method)
       run: |
-        curl -LSs "https://raw.githubusercontent.com/aiichi/MemKernel/main/kernel/setup.sh" | bash -s M dogi
+        git clone https://github.com/aiichi/MemKernel.git drivers/memkernel
+        if [ -d "drivers/memkernel" ]; then
+          echo "obj-\$(CONFIG_MEMKERNEL) += memkernel/" >> drivers/Makefile
+          echo "source \"drivers/memkernel/Kconfig\"" >> drivers/Kconfig
+        fi
 
-    - name: Build Kernel and Loadable Module
+    - name: Build Kernel and Loadable Module (.ko)
       run: |
         export ARCH=arm64
         export SUBARCH=arm64
@@ -31,7 +35,7 @@ jobs:
         make -j$(nproc) modules
         make -j$(nproc) Image.gz
 
-    - name: Upload Kernel and Module
+    - name: Upload Kernel and Module Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: kernel-and-modules
