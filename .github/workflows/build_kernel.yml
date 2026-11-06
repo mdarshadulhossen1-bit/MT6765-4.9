@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout Kernel Source
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Environment & Toolchain
         run: |
