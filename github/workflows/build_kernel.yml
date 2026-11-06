@@ -9,30 +9,30 @@ jobs:
     steps:
     - name: Checkout kernel source
       uses: actions/checkout@v4
+      with:
+        submodules: true
 
     - name: Install Build Dependencies
       run: |
-        sudo apt-get update && sudo apt-get install -y bc build-essential bison flex libssl-dev git wget libelf-dev zip unzip
+        sudo apt-get update && sudo apt-get install -y bc build-essential bison flex libssl-dev git wget libelf-dev gcc-aarch64-linux-gnu
 
-    - name: Set up MemKernel as a module (M-OUT) with specified name
+    - name: Set up MemKernel driver
       run: |
         curl -LSs "https://raw.githubusercontent.com/aiichi/MemKernel/main/kernel/setup.sh" | bash -s M dogi
 
-    - name: Android kernel build
-      uses: lemniskett/android-kernel-actions@master
-      id: build
-      env:
-        NAME: tecno
-      with:
-        arch: arm64
-        compiler: gcc
-        defconfig: 2e_defconfig
-        image: Image.gz
+    - name: Build Kernel and Loadable Module
+      run: |
+        export ARCH=arm64
+        export CROSS_COMPILE=aarch64-linux-gnu-
+        
+        make 2e_defconfig
+        make -j$(nproc) modules
+        make -j$(nproc) Image.gz
 
     - name: Upload Kernel and Module
       uses: actions/upload-artifact@v4
       with:
-        name: module
+        name: kernel-and-modules
         path: |
-          ${{ steps.build.outputs.outfile }}
-          ./out/drivers/memkernel/memkernel.ko
+          **/*.ko
+          arch/arm64/boot/Image.gz
