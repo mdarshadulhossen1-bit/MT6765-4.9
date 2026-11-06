@@ -14,7 +14,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y bc build-essential bison flex libssl-dev git wget libelf-dev
 
-      - name: Clone Poco M Kernel / Jing Knight Driver Source
+      - name: Clone Jing Knight Driver Source
         run: |
           git clone https://github.com/pocojohn/M-kernel.git m-kernel-src
 
