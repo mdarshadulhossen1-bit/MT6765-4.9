@@ -1,0 +1,34 @@
+name: Build BakaSU Kernel for Tecno Spark 6 Air
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Build Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison flex libssl-dev make libc6-dev libncurses5-dev git wget curl gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      - name: Compile BakaSU Kernel
+        run: |
+          export ARCH=arm64
+          export SUBARCH=arm64
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          
+          # Configure and build kernel image with BakaSU
+          make 2e_defconfig
+          make -j$(nproc) Image.gz
+
+      - name: Upload Kernel Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tecno-Spark-6-Air-BakaSU-Image
+          path: arch/arm64/boot/Image.gz
