@@ -1,0 +1,37 @@
+name: Build Kernel and Module
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Kernel Source
+        uses: actions/checkout@v3
+
+      - name: Setup Environment & Toolchain
+        run: |
+          sudo apt-get update && sudo apt-get install -y bc build-essential bison flex libssl-dev git wget libelf-dev
+
+      - name: Clone Jing Knight Driver Source
+        run: |
+          git clone https://github.com/pocojohn/M-kernel.git m-kernel-src
+
+      - name: Build Kernel and Loadable Module (.ko)
+        run: |
+          export ARCH=arm64
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          
+          make 2e_defconfig
+          
+          make -j$(nproc) modules
+          make -j$(nproc) Image.gz
+
+      - name: Upload Build Artifacts (.ko and Image)
+        uses: actions/upload-artifact@v3
+        with:
+          name: kernel-and-modules
+          path: |
+            **/*.ko
+            arch/arm64/boot/Image.gz
